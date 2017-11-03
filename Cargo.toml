@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["NaokiSatou <yomicerisier@gmail.com>"]
 
 [dependencies]
-ws = "0.7.3"
+websocket = "0.20.2"
+hyper = "*"
