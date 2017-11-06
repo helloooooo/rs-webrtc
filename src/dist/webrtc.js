@@ -6,8 +6,10 @@ let localStream = null;
 let peerConnection = null;
 
 // シグナリングサーバへ接続する
-const wsUrl = 'ws://localhost:100000';
-const ws = new WebSocket(wsUrl);
+const wsUrl = 'ws://localhost:2794';
+//const wsUrl = 'ws://localhost:3001';
+//const ws = new WebSocket(wsUrl);
+const ws = new WebSocket(wsUrl,"rust-websocket");
 ws.onopen = function(evt) {
     console.log('ws open()');
 };
