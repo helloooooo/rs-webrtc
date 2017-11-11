@@ -4,5 +4,7 @@ version = "0.1.0"
 authors = ["NaokiSatou <yomicerisier@gmail.com>"]
 
 [dependencies]
-websocket = "0.20.2"
-hyper = "*"
+ws= "*"
+serde = "*"
+serde_json = "1.0"
+serde_derive ="*"

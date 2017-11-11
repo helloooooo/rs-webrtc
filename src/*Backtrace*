@@ -1,5 +1,5 @@
-Debugger entered--Lisp error: (void-variable &)
-  eval(& nil)
+Debugger entered--Lisp error: (void-variable match)
+  eval(match nil)
   elisp--eval-last-sexp(nil)
   eval-last-sexp(nil)
   funcall-interactively(eval-last-sexp nil)

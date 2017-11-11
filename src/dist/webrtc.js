@@ -6,10 +6,24 @@ let localStream = null;
 let peerConnection = null;
 
 // シグナリングサーバへ接続する
-const wsUrl = 'ws://localhost:2794';
-//const wsUrl = 'ws://localhost:3001';
-//const ws = new WebSocket(wsUrl);
-const ws = new WebSocket(wsUrl,"rust-websocket");
+//const wsUrl = 'ws://localhost:2794';
+const wsUrl = 'ws://localhost:3012';
+const ws = new WebSocket(wsUrl);
+const UUID = uuid();
+
+function uuid() {
+  let uuid = "", i, random;
+  for (i = 0; i < 32; i++) {
+    random = Math.random() * 16 | 0;
+
+    if (i == 8 || i == 12 || i == 16 || i == 20) {
+      uuid += "-"
+    }
+    uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
+  }
+  return uuid;
+}
+//const ws = new WebSocket(wsUrl,"rust-websocket");
 ws.onopen = function(evt) {
     console.log('ws open()');
 };
@@ -18,29 +32,33 @@ ws.onerror = function(err) {
 };
 ws.onmessage = function(evt) {
     console.log('ws onmessage() data:', evt.data);
+
     const message = JSON.parse(evt.data);
-    if (message.type === 'offer') {
+    if(message.uuid === UUID) return
+    const detail_message = message.text === undefined ? message :JSON.parse(JSON.stringify(message.text))
+    console.log(detail_message.type)
+    if (detail_message.type === 'offer') {
         // offer 受信時
         console.log('Received offer ...');
-        textToReceiveSdp.value = message.sdp;
-        const offer = new RTCSessionDescription(message);
+        textToReceiveSdp.value = detail_message.sdp;
+        const offer = new RTCSessionDescription(detail_message);
         setOffer(offer);
     }
-    else if (message.type === 'answer') {
+    else if (detail_message.type === 'answer') {
         // answer 受信時
         console.log('Received answer ...');
-        textToReceiveSdp.value = message.sdp;
-        const answer = new RTCSessionDescription(message);
+        textToReceiveSdp.value = detail_message.sdp;
+        const answer = new RTCSessionDescription(detail_message);
         setAnswer(answer);
     }
-    else if (message.type === 'candidate') {
+    else if (detail_message.type === 'candidate') {
         // ICE candidate 受信時
         console.log('Received ICE candidate ...');
-        const candidate = new RTCIceCandidate(message.ice);
+        const candidate = new RTCIceCandidate(detail_message.ice);
         console.log(candidate);
         addIceCandidate(candidate);
     }
-    else if (message.type === 'close') {
+    else if (detail_message.type === 'close') {
         // closeメッセージ受信時
         console.log('peer is closed ...');
         hangUp();
@@ -61,7 +79,7 @@ function addIceCandidate(candidate) {
 // ICE candidate生成時に送信する
 function sendIceCandidate(candidate) {
     console.log('---sending ICE candidate ---');
-    const message = JSON.stringify({ type: 'candidate', ice: candidate });
+    const message = JSON.stringify({ type: 'candidate', ice: candidate,uuid:UUID});
     console.log('sending candidate=' + message);
     ws.send(message);
 }
@@ -153,7 +171,8 @@ function sendSdp(sessionDescription) {
      ----*/
     const message = JSON.stringify(sessionDescription);
     console.log('sending SDP=' + message);
-    ws.send(message);
+    const true_text = JSON.stringify({text:JSON.parse(message),uuid:UUID});
+    ws.send(true_text);
 }
 
 // Connectボタンが押されたら処理を開始
